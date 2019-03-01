@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-anchor.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-anchor.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="DevOps,log," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="问题场景现状​    公司主要是电商相关项目，主要技术为基于http的对外api接口及基于dubbo的内部rpc调用。由于历史原因，各项目组没有统一的日志组件，有的项目使用logback有的使用log4j2。在此基础上，运维使用filebeat+kafka+logstash+es做了一版统一的日志收集。程序将日志写到相同的文件夹内，通过filebeat抓取日志写入kafka，logstash消费k">
+<meta name="keywords" content="DevOps,log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="统一日志收集">
+<meta property="og:url" content="http://zealren.com/2019/03/01/统一日志收集/index.html">
+<meta property="og:site_name" content="Anch⚓️r">
+<meta property="og:description" content="问题场景现状​    公司主要是电商相关项目，主要技术为基于http的对外api接口及基于dubbo的内部rpc调用。由于历史原因，各项目组没有统一的日志组件，有的项目使用logback有的使用log4j2。在此基础上，运维使用filebeat+kafka+logstash+es做了一版统一的日志收集。程序将日志写到相同的文件夹内，通过filebeat抓取日志写入kafka，logstash消费k">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://wx4.sinaimg.cn/mw690/007EyDZOgy1g0n4bink6ij30kb0a974r.jpg">
+<meta property="og:updated_time" content="2019-03-01T06:10:44.959Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="统一日志收集">
+<meta name="twitter:description" content="问题场景现状​    公司主要是电商相关项目，主要技术为基于http的对外api接口及基于dubbo的内部rpc调用。由于历史原因，各项目组没有统一的日志组件，有的项目使用logback有的使用log4j2。在此基础上，运维使用filebeat+kafka+logstash+es做了一版统一的日志收集。程序将日志写到相同的文件夹内，通过filebeat抓取日志写入kafka，logstash消费k">
+<meta name="twitter:image" content="https://wx4.sinaimg.cn/mw690/007EyDZOgy1g0n4bink6ij30kb0a974r.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://zealren.com/2019/03/01/统一日志收集/"/>
+
+
+
+
+
+  <title>统一日志收集 | Anch⚓️r</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/zhaojingyang" class="github-corner" aria-label="View source on Github"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Anch⚓️r</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Anchor's Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zealren.com/2019/03/01/统一日志收集/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Anchor">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Anch⚓️r">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">统一日志收集</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-01T13:47:47+08:00">
+                2019-03-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DevOps/" itemprop="url" rel="index">
+                    <span itemprop="name">DevOps</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DevOps/log/" itemprop="url" rel="index">
+                    <span itemprop="name">log</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="问题场景"><a href="#问题场景" class="headerlink" title="问题场景"></a>问题场景</h2><h3 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h3><p>​    公司主要是电商相关项目，主要技术为基于http的对外api接口及基于dubbo的内部rpc调用。由于历史原因，各项目组没有统一的日志组件，有的项目使用logback有的使用log4j2。在此基础上，运维使用filebeat+kafka+logstash+es做了一版统一的日志收集。程序将日志写到相同的文件夹内，通过filebeat抓取日志写入kafka，logstash消费kafka的日志写到es，通过kibana进行日志的查询和展现。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>​    log4j2已经提供了<strong>KafkaAppender</strong>那么就没有必要使用filebeat抓取了</p>
+<p>​    logback也有直接将日志打到kafka的方案 ，参考 <a href="https://github.com/danielwegener/logback-kafka-appender" target="_blank" rel="noopener">logback-kafka-appender</a><br><a id="more"></a></p>
+<h2 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h2><ul>
+<li><p>方案</p>
+<p>组件:springboot2.04+spring-boot-starter-log4j2(log4j2:2.10.0)+kafka-clients:1.1.0+disruptor:3.3.4(log4j2 2.9以上版本需要使用3.3.4以上版本)</p>
+</li>
+</ul>
+<p>​    <img src="https://wx4.sinaimg.cn/mw690/007EyDZOgy1g0n4bink6ij30kb0a974r.jpg" alt="日志方案"></p>
+<ul>
+<li><p>步骤</p>
+<p>约定日志格式 日志增加额外的信息比如应用名,机器的ip等，并转换成json</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Plugin</span>(</span><br><span class="line">        name = <span class="string">"ELKLayout"</span>,</span><br><span class="line">        category = <span class="string">"Core"</span>,</span><br><span class="line">        elementType = <span class="string">"layout"</span>,</span><br><span class="line">        printObject = <span class="keyword">true</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ELKJSONLayout</span> <span class="keyword">extends</span> <span class="title">AbstractStringLayout</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> KeyValuePair[] additionalFields;</span><br><span class="line">    <span class="keyword">private</span> DateTimeFormatter formatter = DateTimeFormatter.ofPattern(<span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ELKJSONLayout</span><span class="params">(Configuration config, RegexReplacement replace, String eventPattern, PatternSelector patternSelector,</span></span></span><br><span class="line"><span class="function"><span class="params">                          Charset charset, <span class="keyword">boolean</span> alwaysWriteExceptions, <span class="keyword">boolean</span> noConsoleNoAnsi,</span></span></span><br><span class="line"><span class="function"><span class="params">                          String headerPattern, String footerPattern, KeyValuePair[] additionalFields)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(config, charset, PatternLayout.createSerializer(config, replace, headerPattern, (String) <span class="keyword">null</span>,</span><br><span class="line">                patternSelector, alwaysWriteExceptions, noConsoleNoAnsi),</span><br><span class="line">                PatternLayout.createSerializer(config, replace, footerPattern, (String) <span class="keyword">null</span>, patternSelector,</span><br><span class="line">                        alwaysWriteExceptions, noConsoleNoAnsi));</span><br><span class="line">        <span class="keyword">this</span>.additionalFields = additionalFields;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toSerializable</span><span class="params">(LogEvent logEvent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> logData = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.additionalFields != <span class="keyword">null</span> &amp;&amp; <span class="keyword">this</span>.additionalFields.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            KeyValuePair[] var3 = <span class="keyword">this</span>.additionalFields;</span><br><span class="line">            <span class="keyword">int</span> var4 = var3.length;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> var5 = <span class="number">0</span>; var5 &lt; var4; ++var5) &#123;</span><br><span class="line">                KeyValuePair keyValuePair = var3[var5];</span><br><span class="line">                <span class="keyword">if</span> (keyValuePair.getKey().equalsIgnoreCase(<span class="string">"logData"</span>) &amp;&amp; keyValuePair.getValue().equalsIgnoreCase(<span class="string">"false"</span>)) &#123;</span><br><span class="line">                    logData = <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Object&gt; valueMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">        <span class="keyword">int</span> var7;</span><br><span class="line">        <span class="keyword">if</span> (logEvent.getMessage() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            valueMap.put(<span class="string">"message"</span>, logEvent.getMessage().getFormattedMessage());</span><br><span class="line">            <span class="keyword">if</span> (logData) &#123;</span><br><span class="line">                Object[] objects = logEvent.getMessage().getParameters();</span><br><span class="line">                List&lt;Object&gt; objs = <span class="keyword">new</span> ArrayList(objects == <span class="keyword">null</span> ? <span class="number">0</span> : objects.length);</span><br><span class="line">                <span class="keyword">if</span> (objects != <span class="keyword">null</span> &amp;&amp; objects.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    Object[] var17 = objects;</span><br><span class="line">                    var7 = objects.length;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> var8 = <span class="number">0</span>; var8 &lt; var7; ++var8) &#123;</span><br><span class="line">                        Object object = var17[var8];</span><br><span class="line">                        <span class="keyword">if</span> (object <span class="keyword">instanceof</span> Map) &#123;</span><br><span class="line">                            Iterator var10 = ((Map) object).keySet().iterator();</span><br><span class="line"></span><br><span class="line">                            <span class="keyword">while</span> (var10.hasNext()) &#123;</span><br><span class="line">                                Object key = var10.next();</span><br><span class="line">                                valueMap.put(key.toString(), ((Map) object).get(key));</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            objs.add(object);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                valueMap.put(<span class="string">"data"</span>, objs);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        LocalDateTime time = LocalDateTime.now();</span><br><span class="line">        valueMap.put(<span class="string">"currentTime"</span>, time.format(<span class="keyword">this</span>.formatter));</span><br><span class="line">        valueMap.put(<span class="string">"level"</span>, logEvent.getLevel().getStandardLevel());</span><br><span class="line">        valueMap.put(<span class="string">"logName"</span>, logEvent.getLoggerName());</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.additionalFields != <span class="keyword">null</span> &amp;&amp; <span class="keyword">this</span>.additionalFields.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            KeyValuePair[] var16 = <span class="keyword">this</span>.additionalFields;</span><br><span class="line">            <span class="keyword">int</span> var18 = var16.length;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (var7 = <span class="number">0</span>; var7 &lt; var18; ++var7) &#123;</span><br><span class="line">                KeyValuePair valuePair = var16[var7];</span><br><span class="line">                valueMap.put(valuePair.getKey(), valuePair.getValue());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (logEvent.getThrown() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            valueMap.put(<span class="string">"error"</span>, ExceptionUtils.getStackTrace(logEvent.getThrown()));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> JSON.toJSONString(valueMap,</span><br><span class="line">                <span class="keyword">new</span> SerializerFeature[]&#123;</span><br><span class="line">                        SerializerFeature.DisableCircularReferenceDetect,</span><br><span class="line">                        SerializerFeature.WriteDateUseDateFormat&#125;) + <span class="string">"\r\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PluginFactory</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ELKJSONLayout <span class="title">createLayout</span><span class="params">(@PluginAttribute(value = <span class="string">"pattern"</span>, defaultString = <span class="string">"%m%n"</span>)</span> String pattern,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginElement</span><span class="params">(<span class="string">"PatternSelector"</span>)</span> PatternSelector patternSelector,</span></span><br><span class="line"><span class="function">                                             @PluginConfiguration Configuration config,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginElement</span><span class="params">(<span class="string">"Replace"</span>)</span> RegexReplacement replace,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginAttribute</span><span class="params">(<span class="string">"charset"</span>)</span> Charset charset,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginAttribute</span><span class="params">(value = <span class="string">"alwaysWriteExceptions"</span>, defaultBoolean = <span class="keyword">true</span>)</span> <span class="keyword">boolean</span> alwaysWriteExceptions,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginAttribute</span><span class="params">(value = <span class="string">"noConsoleNoAnsi"</span>, defaultBoolean = <span class="keyword">false</span>)</span> <span class="keyword">boolean</span> noConsoleNoAnsi,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginAttribute</span><span class="params">(<span class="string">"header"</span>)</span> String headerPattern,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginAttribute</span><span class="params">(<span class="string">"footer"</span>)</span> String footerPattern,</span></span><br><span class="line"><span class="function">                                             @<span class="title">PluginElement</span><span class="params">(<span class="string">"AdditionalField"</span>)</span> KeyValuePair[] additionalFields) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ELKJSONLayout(config, replace, pattern, patternSelector, charset, alwaysWriteExceptions, noConsoleNoAnsi, headerPattern, footerPattern, additionalFields);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">....省略...</span><br><span class="line"><span class="comment">&lt;!-- 如果需要打印location需加includeLocation=true --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Kafka</span> <span class="attr">name</span>=<span class="string">"Kafka"</span> <span class="attr">topic</span>=<span class="string">"logs"</span> <span class="attr">includeLocation</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Filters</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">ThresholdFilter</span> <span class="attr">level</span>=<span class="string">"INFO"</span> <span class="attr">onMatch</span>=<span class="string">"ACCEPT"</span> <span class="attr">onMismatch</span>=<span class="string">"DENY"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Filters</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">ELKLayout</span> &gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">KeyValuePair</span> <span class="attr">key</span>=<span class="string">"busniess"</span> <span class="attr">value</span>=<span class="string">"order"</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">KeyValuePair</span> <span class="attr">key</span>=<span class="string">"module"</span> <span class="attr">value</span>=<span class="string">"order-service"</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">KeyValuePair</span> <span class="attr">key</span>=<span class="string">"logData"</span> <span class="attr">value</span>=<span class="string">"false"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">ELKLayout</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">"%d&#123;yyyy-MM-dd 'at' HH:mm:ss z&#125; %-5level %class&#123;36&#125; %L %M - %msg%xEx%n"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"bootstrap.servers"</span>&gt;</span>$&#123;KAFKA_SERVER&#125;<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"max.block.ms"</span>&gt;</span>5000<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"buffer.memory"</span>&gt;</span>67108864<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"batch.size"</span>&gt;</span>4096<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"linger.ms"</span>&gt;</span>5000<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">"acks"</span>&gt;</span>0<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Kafka</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Async</span> <span class="attr">name</span>=<span class="string">"kafkaLogger"</span> <span class="attr">level</span>=<span class="string">"INFO"</span> <span class="attr">additivity</span>=<span class="string">"false"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">appender-ref</span> <span class="attr">ref</span>=<span class="string">"Kafka"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Async</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- avoid recursive logging --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Logger</span> <span class="attr">name</span>=<span class="string">"org.apache.kafka"</span> <span class="attr">level</span>=<span class="string">"INFO"</span> /&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">&lt;!-- 如果需要打印location需加includeLocation=true --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">AsyncRoot</span> <span class="attr">level</span>=<span class="string">"info"</span> <span class="attr">includeLocation</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">Appender-Ref</span> <span class="attr">ref</span>=<span class="string">"kafkaLogger"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">AsyncRoot</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span>  </span><br><span class="line">...省略....</span><br></pre></td></tr></table></figure>
+<p>   日志格式例子:</p>
+<blockquote>
+<p>{“currentTime”:”2019-03-01 10:40:58”,”busniess”:”order”,”logName”:”org.apache.curator.framework.state.ConnectionStateManager”,”level”:”INFO”,”module”:”order-service”,”logData”:”false”,”message”:”State change: RECONNECTED”}</p>
+</blockquote>
+<p>kafka写到logstash logstash写到es省略</p>
+</li>
+<li><p>注意</p>
+<ol>
+<li>每个应用还是同时向本地文件系统也写了一份日志，如果不想写可以使用<strong>FailoverAppender</strong>包一下</li>
+<li>logback写kafka省略</li>
+<li>log4j2启用可以使用Disruptor的异步日志方式可使用<asynclogger> ,<asyncroot>,设置-Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector等方式</asyncroot></asynclogger></li>
+</ol>
+</li>
+<li><p>参考</p>
+<ol>
+<li><a href="https://logging.apache.org/log4j/2.x/manual/appenders.html" target="_blank" rel="noopener">Log4j2文档</a></li>
+</ol>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>        
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Donate comment here</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Anchor 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Anchor 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/DevOps/" rel="tag"># DevOps</a>
+          
+            <a href="/tags/log/" rel="tag"># log</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/26/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Anchor</p>
+              <p class="site-description motion-element" itemprop="description">Anchor</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhaojingyang" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题场景"><span class="nav-number">1.</span> <span class="nav-text">问题场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#现状"><span class="nav-number">1.1.</span> <span class="nav-text">现状</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">1.2.</span> <span class="nav-text">问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案"><span class="nav-number">2.</span> <span class="nav-text">方案</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Anchor</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+<div class=BbeiAn-info">
+  渝ICP备 -
+  <a href="http://www.miitbeian.gov.cn/">14029750号-5</a>
+  </a>
+</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
