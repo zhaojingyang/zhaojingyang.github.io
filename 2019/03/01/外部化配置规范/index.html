@@ -97,7 +97,7 @@
 <meta property="og:image" content="https://wx1.sinaimg.cn/mw690/007EyDZOly1g0nou9l1plj31o00juwk9.jpg">
 <meta property="og:image" content="https://wx2.sinaimg.cn/mw690/007EyDZOly1g0nou9j9vnj312g0j0402.jpg">
 <meta property="og:image" content="https://wx2.sinaimg.cn/mw690/007EyDZOly1g0nou9kg1jj30y00hoacr.jpg">
-<meta property="og:updated_time" content="2019-03-01T15:23:50.341Z">
+<meta property="og:updated_time" content="2019-03-03T14:11:34.306Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="外部化配置规范">
 <meta name="twitter:description" content="问题​    公司项目采用Apollo管理各系统的配置信息，开发环境和测试环境使用一个服务，线上和stg环境使用一套服务。开发人员开发时候设置的env也是DEV环境。有时在版本迭代更改配置或调试时候可能会影响DEV环境。同时DEV环境又给其他服务的DEV环境提供服务，这样可能对其他组有影响。">
@@ -406,9 +406,9 @@
 </li>
 </ul>
 <ul>
-<li><p>Apollo 1.0以上版本支持配置【本地配置目录】-DcacheDir配置项</p>
+<li><p>Apollo 1.0以上版本支持配置【本地配置目录】apollo.cacheDir 配置项</p>
 </li>
-<li><p>在开发人员本地调试时，通过在服务启动时候指定env=Local cacheDir读取本地配置达到差异化配置且不影响稳定环境。</p>
+<li><p>在开发人员本地调试时，通过在服务启动时候指定-Denv=Local -Dapollo.cacheDir=${cacheDir}读取本地配置达到差异化配置且不影响稳定环境。</p>
 <p><img src="https://wx1.sinaimg.cn/mw690/007EyDZOly1g0nou9l1plj31o00juwk9.jpg" alt="img"><br><img src="https://wx2.sinaimg.cn/mw690/007EyDZOly1g0nou9j9vnj312g0j0402.jpg" alt="img"><br><img src="https://wx2.sinaimg.cn/mw690/007EyDZOly1g0nou9kg1jj30y00hoacr.jpg" alt="img"></p>
 </li>
 <li><p>将dubbo服务端暴露版本及消费者引用的服务版本外部化配置到Apollo</p>
