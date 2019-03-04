@@ -376,7 +376,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  174 字
+                  192 字
                 </span>
               
 
@@ -414,29 +414,14 @@
 
       
         
-          
-            <h3 id="增加基于的访问统计"><a href="#增加基于的访问统计" class="headerlink" title="增加基于的访问统计"></a>增加基于的访问统计</h3><ul>
-<li><p>参考</p>
-<p>见 <a href="https://vonsdite.cn/posts/74d5335f.html" target="_blank" rel="noopener">Hexo Next leancloud 设置</a></p>
-</li>
-</ul>
-<ul>
-<li><p>有用户但无统计数</p>
-<p>设置完成后Leancloud用户名有值但是页面访问数无，看请求信息返回</p>
-<blockquote>
-<p>leancloud  Access denied by api domain white list.The request origin header is ‘null’.”</p>
-</blockquote>
-<p>查询到华东节点的JS有bug见<a href="https://forum.leancloud.cn/t/access-denied-by-api-domain-white-list-the-request-origin-header-is-null/18607/4" target="_blank" rel="noopener">Next Leancloud 华东节点bug</a></p>
-<blockquote>
-<p>这个版本的 SDK 比较早，还不支持华东节点，您可以将模板里的这个地址替换为最新的版本即可： <a href="https://cdn1.lncld.net/static/js/3.10.0/av-min.js" target="_blank" rel="noopener">https://cdn1.lncld.net/static/js/3.10.0/av-min.js</a></p>
-</blockquote>
-</li>
-<li><p>解决</p>
-<p>修改 ${blogpath}/themes/next/layout/_third-party/analytics/lean-analytics.swig将<code>https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js</code>修改为<code>https://cdn1.lncld.net/static/js/3.10.0/av-min.js</code></p>
-</li>
-</ul>
-
-          
+          <p>​    本文将记录本博客基于next的一些改动点。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/03/04/站点优化/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
