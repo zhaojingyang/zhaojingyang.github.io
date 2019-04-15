@@ -86,19 +86,19 @@
 
 
 
-<meta name="description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。 关于换行  在各操作系">
+<meta name="description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。">
 <meta name="keywords" content="Tools,规范">
 <meta property="og:type" content="article">
 <meta property="og:title" content="团队跨平台开发工具设置">
 <meta property="og:url" content="http://zealren.com/2019/04/15/团队跨平台开发工具设置/index.html">
 <meta property="og:site_name" content="Anch⚓️r">
-<meta property="og:description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。 关于换行  在各操作系">
+<meta property="og:description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://wx1.sinaimg.cn/mw690/007EyDZOgy1g23i58y4i5j31j60u07fs.jpg">
-<meta property="og:updated_time" content="2019-04-15T10:41:42.013Z">
+<meta property="og:updated_time" content="2019-04-15T10:45:27.080Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="团队跨平台开发工具设置">
-<meta name="twitter:description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。 关于换行  在各操作系">
+<meta name="twitter:description" content="痛点  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 换行 带来问题。比如idea中pull下代码后，diff代码时由于换行而不能显示，只能通过show history来查看。">
 <meta name="twitter:image" content="https://wx1.sinaimg.cn/mw690/007EyDZOgy1g23i58y4i5j31j60u07fs.jpg">
 
 
@@ -429,7 +429,7 @@
       
 
       
-        <h2 id="痛点"><a href="#痛点" class="headerlink" title="痛点"></a>痛点</h2><p>  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 <strong>换行</strong> 带来问题。比如idea中pull下代码后，diff代码时由于<strong>换行</strong>而不能显示，只能通过show history来查看。</p>
+        <h2 id="痛点"><a href="#痛点" class="headerlink" title="痛点"></a>痛点</h2><p>  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 <strong>换行</strong> 带来问题。比如idea中pull下代码后，diff代码时由于<strong>换行</strong>而不能显示，只能通过show history来查看。<br><a id="more"></a></p>
 <h2 id="关于换行"><a href="#关于换行" class="headerlink" title="关于换行"></a>关于换行</h2><p>  在各操作系统下，文本文件所使用的换行符是不一样的。UNIX/Linux 使用的是 0x0A（LF），早期的 Mac OS 使用的是 0x0D（CR），后来的 OS X 在更换内核后与 UNIX 保持一致了。但 DOS/Windows 一直使用 0x0D0A（CRLF）作为换行符。</p>
 <h2 id="git-中换行的控制与设置"><a href="#git-中换行的控制与设置" class="headerlink" title="git 中换行的控制与设置"></a>git 中换行的控制与设置</h2><ul>
 <li><p>core.autocrlf</p>
