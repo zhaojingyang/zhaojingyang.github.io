@@ -270,6 +270,246 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zealren.com/2019/04/15/团队跨平台开发工具设置/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Anchor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Anch⚓️r">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/15/团队跨平台开发工具设置/" itemprop="url">团队跨平台开发工具设置</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-15T17:40:16+08:00">
+                2019-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/规范/" itemprop="url" rel="index">
+                    <span itemprop="name">规范</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/规范/Tools/" itemprop="url" rel="index">
+                    <span itemprop="name">Tools</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/15/团队跨平台开发工具设置/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/15/团队跨平台开发工具设置/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/04/15/团队跨平台开发工具设置/" class="leancloud_visitors" data-flag-title="团队跨平台开发工具设置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  714 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="痛点"><a href="#痛点" class="headerlink" title="痛点"></a>痛点</h2><p>  现阶段软件开发中大家可能都会使用到git或者ide。可能都会有跨平台的场景，团队人员的系统不一致，有的人使用Windows电脑，有的人使用linux，mac。或者大家都使用同一个操作系统的电脑，但是代码管理平台和开发系统不一致。这样就有可能由于 <strong>换行</strong> 带来问题。比如idea中pull下代码后，diff代码时由于<strong>换行</strong>而不能显示，只能通过show history来查看。</p>
+<h2 id="关于换行"><a href="#关于换行" class="headerlink" title="关于换行"></a>关于换行</h2><p>  在各操作系统下，文本文件所使用的换行符是不一样的。UNIX/Linux 使用的是 0x0A（LF），早期的 Mac OS 使用的是 0x0D（CR），后来的 OS X 在更换内核后与 UNIX 保持一致了。但 DOS/Windows 一直使用 0x0D0A（CRLF）作为换行符。</p>
+<h2 id="git-中换行的控制与设置"><a href="#git-中换行的控制与设置" class="headerlink" title="git 中换行的控制与设置"></a>git 中换行的控制与设置</h2><ul>
+<li><p>core.autocrlf</p>
+<h4 id="1-input"><a href="#1-input" class="headerlink" title="(1) input"></a>(1) input</h4><p>If you’re on a <strong>Windows</strong> machine, set it to true — this converts LF endings into CRLF when you check out code:<br><code>$ git config --global core.autocrlf true</code><br><strong>如果是在 Windows 系统上，把它设置成 true，这样在检出代码时，换行(LF)会被转换成回车和换行(CRLF)</strong></p>
+<h4 id="2-input"><a href="#2-input" class="headerlink" title="(2) input"></a>(2) input</h4><p>If you’re on a <strong>Linux or Mac</strong> system that uses LF line endings, then you don’t want Git to automatically convert them when you check out files; however, if a file with CRLF endings accidentally gets introduced, then you may want Git to fix it. You can tell Git to convert CRLF to LF on commit but not the other way around by setting core.autocrlf to input:<br><code>$ git config --global core.autocrlf input</code><br>如果使用以换行作为行结束符的 Linux 或 Mac，你不需要 Git 在检出文件时进行自动的转换；然而当一个以回车加换行作为行结束符的文件不小心被引入时，你肯定想让 Git 修正。 你可以把 core.autocrlf 设置成 input 来告诉 Git 在<strong>提交时把回车和换行转(CRLF)换成换行(LF)，检出时不转换</strong></p>
+<h4 id="3-false"><a href="#3-false" class="headerlink" title="(3) false"></a>(3) false</h4><p>If you’re a Windows programmer doing a <strong>Windows-only project</strong>, then you can turn off this functionality, recording the carriage returns in the repository by setting the config value to false:<br><code>$ git config --global core.autocrlf false</code><br>如果你是 Windows 程序员，且正在开发仅运行在 Windows 上的项目，可以设置 false 取消此功能，把回车(CR)保留在版本库中`</p>
+</li>
+<li><p>core.safecrlf</p>
+<ul>
+<li>false 不做任何检查</li>
+<li>warn 在提交时候检查并警告</li>
+<li>true 在提交时检查，如果发现混用则拒绝提交</li>
+</ul>
+</li>
+<li>建议的配置<ul>
+<li>Windows下<br>  core.autocrlf 设置为true</li>
+<li>Mac/Linux<br>  core.autocrlf 设置为false</li>
+<li>core.safecrlf 设置为true或warn</li>
+</ul>
+</li>
+</ul>
+<h2 id="idea中设置换行"><a href="#idea中设置换行" class="headerlink" title="idea中设置换行"></a>idea中设置换行</h2><p>idea中大家都设置成统一的换行方式，eclipse中也有相关设置本文省略</p>
+<ol>
+<li>File-&gt;Settings 或工具栏的扳手(views-toolbar开启)</li>
+<li>Editor-&gt;Code Style</li>
+<li>设置Line separator(for new files) Unix and OSX (\n)<br><img src="https://wx1.sinaimg.cn/mw690/007EyDZOgy1g23i58y4i5j31j60u07fs.jpg" alt="idea设置换行"></li>
+</ol>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><ul>
+<li>!(<a href="https://git-scm.com/book/zh/v1/%E8%87%AA%E5%AE%9A%E4%B9%89-Git-%E9%85%8D%E7%BD%AE-Git" target="_blank" rel="noopener">https://git-scm.com/book/zh/v1/%E8%87%AA%E5%AE%9A%E4%B9%89-Git-%E9%85%8D%E7%BD%AE-Git</a>)</li>
+<li>!(<a href="https://xiaozhuanlan.com/topic/4053786912" target="_blank" rel="noopener">https://xiaozhuanlan.com/topic/4053786912</a>)</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    <div>
+      
+    </div>        
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://zealren.com/2019/03/22/基于eazyui-tabs的统一backend后台改造/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1746,7 +1986,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1757,7 +1997,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1768,7 +2008,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
