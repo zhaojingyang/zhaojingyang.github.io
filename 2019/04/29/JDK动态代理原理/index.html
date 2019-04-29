@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-anchor.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-anchor.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码,java,动态代理,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="为什么需要代理  代理在我们现实生活中很常见，比如你买了东西送到公司，公司比较严格，快递员来送货不能到办公区域只能由前台代收然后你再到前台去拿。小员工你想直接见老板几乎是不可能的，大多需要秘书传话;比如你想访问谷歌，但是被墙了，你买了个VPN，通过VPN去访问谷歌。你想租房，但是不想自己打理，那就将房子交给中介处理等等。   我们发现代理在生活中普遍存在，大多是我们想要一项服务，但是有些限制必须通">
+<meta name="keywords" content="源码,java,动态代理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDK动态代理原理">
+<meta property="og:url" content="http://zealren.com/2019/04/29/JDK动态代理原理/index.html">
+<meta property="og:site_name" content="Anch⚓️r">
+<meta property="og:description" content="为什么需要代理  代理在我们现实生活中很常见，比如你买了东西送到公司，公司比较严格，快递员来送货不能到办公区域只能由前台代收然后你再到前台去拿。小员工你想直接见老板几乎是不可能的，大多需要秘书传话;比如你想访问谷歌，但是被墙了，你买了个VPN，通过VPN去访问谷歌。你想租房，但是不想自己打理，那就将房子交给中介处理等等。   我们发现代理在生活中普遍存在，大多是我们想要一项服务，但是有些限制必须通">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://wx2.sinaimg.cn/mw1024/007EyDZOgy1g2jkbcvyavj30m90d1t9r.jpg">
+<meta property="og:updated_time" content="2019-04-29T09:40:00.176Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JDK动态代理原理">
+<meta name="twitter:description" content="为什么需要代理  代理在我们现实生活中很常见，比如你买了东西送到公司，公司比较严格，快递员来送货不能到办公区域只能由前台代收然后你再到前台去拿。小员工你想直接见老板几乎是不可能的，大多需要秘书传话;比如你想访问谷歌，但是被墙了，你买了个VPN，通过VPN去访问谷歌。你想租房，但是不想自己打理，那就将房子交给中介处理等等。   我们发现代理在生活中普遍存在，大多是我们想要一项服务，但是有些限制必须通">
+<meta name="twitter:image" content="https://wx2.sinaimg.cn/mw1024/007EyDZOgy1g2jkbcvyavj30m90d1t9r.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://zealren.com/2019/04/29/JDK动态代理原理/">
+
+
+
+
+
+  <title>JDK动态代理原理 | Anch⚓️r</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/zhaojingyang" class="github-corner" aria-label="View source on Github"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Anch⚓️r</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Anchor's Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zealren.com/2019/04/29/JDK动态代理原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Anchor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Anch⚓️r">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JDK动态代理原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-29T11:08:45+08:00">
+                2019-04-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/IT/" itemprop="url" rel="index">
+                    <span itemprop="name">IT</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/IT/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/IT/java/JDK动态代理/" itemprop="url" rel="index">
+                    <span itemprop="name">JDK动态代理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/29/JDK动态代理原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/29/JDK动态代理原理/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/04/29/JDK动态代理原理/" class="leancloud_visitors" data-flag-title="JDK动态代理原理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  4.3k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  22 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="为什么需要代理"><a href="#为什么需要代理" class="headerlink" title="为什么需要代理"></a>为什么需要代理</h2><p>  代理在我们现实生活中很常见，比如你买了东西送到公司，公司比较严格，快递员来送货不能到办公区域只能由前台代收然后你再到前台去拿。小员工你想直接见老板几乎是不可能的，大多需要秘书传话;比如你想访问谷歌，但是被墙了，你买了个VPN，通过VPN去访问谷歌。你想租房，但是不想自己打理，那就将房子交给中介处理等等。</p>
+<p>  我们发现代理在生活中普遍存在，大多是我们想要一项服务，但是有些限制必须通过其他方式去获取；或者已有一些服务，我在其基础上做些限制/增强等再提供出去而。</p>
+<p>  软件中也很常见，比如我们需要对一些服务统一做鉴权后再访问，服务增加日志服务等。一些接口由于协议问题需要做一些协议的转换再调用原接口等；</p>
+<a id="more"></a>
+<h2 id="代理角色与分类"><a href="#代理角色与分类" class="headerlink" title="代理角色与分类"></a>代理角色与分类</h2><p>  代理中涉及的角色有：</p>
+<ul>
+<li><p>抽象主题</p>
+<p>声明真实对象和代理对象的共同接口</p>
+</li>
+<li><p>代理</p>
+<p>代理对象角色内部含有对真实对象的引用，从而可以操作真实对象，同时代理对象提供与真实对象相同的接口以便在任何时刻都能代替真实对象。同时，代理对象可以在执行真实对象操作时，附加其他的操作，相当于对真实对象进行封装。</p>
+</li>
+<li><p>真实对象</p>
+<p>代理角色所代表的真实对象，是我们最终要引用的对象</p>
+</li>
+</ul>
+<p>代理又分静态代理和动态代理，动态代理就是将静态代理中变化的部分(手动去写新的代理服务)部分交由字节码工具动态生成了而已。</p>
+<h2 id="静态代理例子"><a href="#静态代理例子" class="headerlink" title="静态代理例子"></a>静态代理例子</h2><ul>
+<li><p>抽象主题</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">doSth</span><span class="params">(String param)</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>真实对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BusinessInterfaceImpl</span> <span class="keyword">implements</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">doSth</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"do sth in BusinessInterfaceImpl"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"hello "</span> + param + <span class="string">"SubjectImpl"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"hello"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>代理A</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StaticProxyA</span> <span class="keyword">implements</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> BusinessInterface proxyInstance;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">StaticProxyA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">StaticProxyA</span> <span class="params">(BusinessInterface proxyInstance)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.proxyInstance = proxyInstance;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">doSth</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"do sth before StaticProxyA"</span>);</span><br><span class="line">		String result = proxyInstance.doSth(param);</span><br><span class="line">		System.out.println(<span class="string">"do sth after StaticProxyA"</span>);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"do sth before StaticProxyA"</span>);</span><br><span class="line">		proxyInstance.hello();</span><br><span class="line">		System.out.println(<span class="string">"do sth after StaticProxyA"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>运行结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdkProxyTest</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">		BusinessInterface businessInterface = <span class="keyword">new</span> BusinessInterfaceImpl();</span><br><span class="line">		BusinessInterface proxyA = <span class="keyword">new</span> StaticProxyA(businessInterface);</span><br><span class="line">		System.out.println(proxyA.doSth(<span class="string">"AA"</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">输出内容：</span><br><span class="line"><span class="keyword">do</span> sth before real</span><br><span class="line"><span class="keyword">do</span> sth in BusinessInterfaceImpl</span><br><span class="line"><span class="keyword">do</span> sth after real</span><br><span class="line">hello AA SubjectImpl</span><br></pre></td></tr></table></figure>
+<p>这样我们就成功的提供了一个静态代理的例子，如果由于业务的发展可能需要做其他的事情，基于开闭原则我们肯定不建议在StaticProxyA的代码中增加if else 而是会创建一个StaticProxyB，StaticProxyC……等去封装。但是他们的结构基本都是一样的，变化的部分只是各个方法体内的逻辑而已，在A方法内是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">"do sth before StaticProxyA"</span>);</span><br><span class="line">String result = proxyInstance.doSth(param);</span><br><span class="line">System.out.println(<span class="string">"do sth after StaticProxyA"</span>);</span><br><span class="line"><span class="keyword">return</span> result;</span><br></pre></td></tr></table></figure>
+<p>B方法内可能是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">"do sth before StaticProxyB"</span>);</span><br><span class="line">String result = proxyInstance.doSth(param);</span><br><span class="line">System.out.println(<span class="string">"do sth after StaticProxyB"</span>);</span><br><span class="line"><span class="keyword">return</span> result;</span><br></pre></td></tr></table></figure>
+<p>如果能自动生成就好了。这就是动态代理出现的原因。</p>
+</li>
+</ul>
+<h2 id="动态代理例子"><a href="#动态代理例子" class="headerlink" title="动态代理例子"></a>动态代理例子</h2><p>动态代理在java中应用的比较多，比如mybatis的mapper，spring的aop等功能都使用了动态代理，JDK内提供了基于接口创建动态代理的能力。如下例子简单实现了一个动态代理。</p>
+<ol>
+<li><p>抽象主题(不变)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">doSth</span><span class="params">(String param)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>真实对象(不变)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BusinessInterfaceImpl</span> <span class="keyword">implements</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">doSth</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"do sth in BusinessInterfaceImpl"</span>);</span><br><span class="line">       <span class="keyword">return</span> <span class="string">"hello "</span> + param + <span class="string">"SubjectImpl"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"hello"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>代理对象实现<strong>InvocationHandler</strong>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BusinessInterfaceProxy</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Object target;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">BusinessInterfaceProxy</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.target = target;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Do something before"</span>);</span><br><span class="line">		Object result = method.invoke(target, args);</span><br><span class="line">		System.out.println(<span class="string">"Do something after"</span>);</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 获取被代理接口实例对象</span></span><br><span class="line"><span class="comment">	 * 此方法可不提供，在Client main 方法内直接用Proxy.newProxyInstance创建即可</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">getProxy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (T) Proxy.newProxyInstance(target.getClass().getClassLoader(),  	            target.getClass().getInterfaces(), <span class="keyword">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>运行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdkProxyTest</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 保存生成的代理类的字节码文件</span></span><br><span class="line">		System.getProperties().put(<span class="string">"sun.misc.ProxyGenerator.saveGeneratedFiles"</span>, <span class="string">"true"</span>);</span><br><span class="line">		BusinessInterface businessInterface = <span class="keyword">new</span> BusinessInterfaceImpl();</span><br><span class="line">		BusinessInterface proxyBusinessInterface = <span class="keyword">new</span> BusinessInterfaceProxy(businessInterface).getProxy();</span><br><span class="line">		String result = proxyBusinessInterface.doSth(<span class="string">"test"</span>);</span><br><span class="line">		System.out.println(result);</span><br><span class="line">		proxyBusinessInterface.hello();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">结果:</span><br><span class="line">Do something before</span><br><span class="line"><span class="keyword">do</span> sth in BusinessInterfaceImpl</span><br><span class="line">Do something after</span><br><span class="line">hello test SubjectImpl</span><br><span class="line">Do something before</span><br><span class="line">hello</span><br><span class="line">Do something after</span><br></pre></td></tr></table></figure>
+<p>上例展示了一个动态代理的例子，几乎完成了和静态代理A一样的任务，如再有其他业务增加可以直接增加新的类实现InvocationHandler接口，将新的逻辑封装在invoke方法内就可以了，完全可以使用匿名类去创建。</p>
+<p>那么是如何实现的呢？</p>
+<h2 id="动态代理实现原理"><a href="#动态代理实现原理" class="headerlink" title="动态代理实现原理"></a>动态代理实现原理</h2><h4 id="UML"><a href="#UML" class="headerlink" title="UML"></a>UML</h4><p><img src="https://wx2.sinaimg.cn/mw1024/007EyDZOgy1g2jkbcvyavj30m90d1t9r.jpg" alt="动态代理"></p>
+</li>
+</ol>
+<h4 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h4><p>  代理对象实现了<strong>InvocationHandler</strong>接口，并注入了真实对象，通过<strong>invoke</strong>方法内部封装了<strong>新的目标逻辑</strong>，</p>
+<p>通过<strong>Proxy.newProxyInstance</strong>会通过ProxyGenerator生成一个新的类ProxyClass${n}的字节码文件（此类中有个唯一参数是InvocationHandler类型的参数的构造方法，并且此类实现了传入的<strong>抽象主题</strong>接口，在实现此接口上是调用InvocationHandler实例变量的invoke方法，invoke内调用了<strong>真实对象</strong>的方法）。</p>
+<p>然后会使用classLoader加载新创建的类的字节码，</p>
+<p>然后通过反射Constructor的newInstance创建一个实例并返回，完成调用逻辑。</p>
+<p>我们来看看代码。</p>
+<ol>
+<li><p>Proxy.newProxyInstance</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">newProxyInstance</span><span class="params">(ClassLoader loader,</span></span></span><br><span class="line"><span class="function"><span class="params">                                          Class&lt;?&gt;[] interfaces,</span></span></span><br><span class="line"><span class="function"><span class="params">                                          InvocationHandler h)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IllegalArgumentException</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Objects.requireNonNull(h);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Class&lt;?&gt;[] intfs = interfaces.clone();</span><br><span class="line">        <span class="keyword">final</span> SecurityManager sm = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (sm != <span class="keyword">null</span>) &#123;</span><br><span class="line">            checkProxyAccess(Reflection.getCallerClass(), loader, intfs);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * 如缓存中用此类那么从缓存中获取，否则生成一个新的类 **关键在这里**</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Class&lt;?&gt; cl = getProxyClass0(loader, intfs);</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (sm != <span class="keyword">null</span>) &#123;</span><br><span class="line">                checkNewProxyPermission(Reflection.getCallerClass(), cl);</span><br><span class="line">            &#125;</span><br><span class="line">						<span class="comment">//获取此类的构造方法(生成的类有参数是InvocationHandler的构造方法)</span></span><br><span class="line">            <span class="keyword">final</span> Constructor&lt;?&gt; cons = cl.getConstructor(constructorParams);</span><br><span class="line">            <span class="keyword">final</span> InvocationHandler ih = h;</span><br><span class="line">            <span class="keyword">if</span> (!Modifier.isPublic(cl.getModifiers())) &#123;</span><br><span class="line">                AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedAction&lt;Void&gt;() &#123;</span><br><span class="line">                    <span class="function"><span class="keyword">public</span> Void <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                        cons.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//通过此构造方法返回一个实例</span></span><br><span class="line">            <span class="keyword">return</span> cons.newInstance(<span class="keyword">new</span> Object[]&#123;h&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalAccessException|InstantiationException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(e.toString(), e);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            Throwable t = e.getCause();</span><br><span class="line">            <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">                <span class="keyword">throw</span> (RuntimeException) t;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(t.toString(), t);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(e.toString(), e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Proxy.getProxyClass0方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Generate a proxy class.  Must call the checkProxyAccess method</span></span><br><span class="line"><span class="comment"> * to perform permission checks before calling this.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Class&lt;?&gt; getProxyClass0(ClassLoader loader,</span><br><span class="line">                                       Class&lt;?&gt;... interfaces) &#123;</span><br><span class="line">    <span class="keyword">if</span> (interfaces.length &gt; <span class="number">65535</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"interface limit exceeded"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">// If the proxy class defined by the given loader implementing</span></span><br><span class="line">    <span class="comment">// the given interfaces exists, this will simply return the cached copy;</span></span><br><span class="line">    <span class="comment">// otherwise, it will create the proxy class via the ProxyClassFactory</span></span><br><span class="line">    <span class="keyword">return</span> proxyClassCache.get(loader, interfaces);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>WeakCache的get方法</p>
+<p>此处代码开始没看明白，debug后开始supplier是空的会创建一个Factory(实现了Supplier接口)然后while循环再通过supplier的get去获取  顺序见 NO1 NO2 NO3</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Look-up the value through the cache. This always evaluates the</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@code</span> subKeyFactory&#125; function and optionally evaluates</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@code</span> valueFactory&#125; function if there is no entry in the cache for given</span></span><br><span class="line"><span class="comment">     * pair of (key, subKey) or the entry has already been cleared.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key       possibly null key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> parameter parameter used together with key to create sub-key and</span></span><br><span class="line"><span class="comment">     *                  value (should not be null)</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the cached value (never null)</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> parameter&#125; passed in or</span></span><br><span class="line"><span class="comment">     *                              &#123;<span class="doctag">@code</span> sub-key&#125; calculated by</span></span><br><span class="line"><span class="comment">     *                              &#123;<span class="doctag">@code</span> subKeyFactory&#125; or &#123;<span class="doctag">@code</span> value&#125;</span></span><br><span class="line"><span class="comment">     *                              calculated by &#123;<span class="doctag">@code</span> valueFactory&#125; is null.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(K key, P parameter)</span> </span>&#123;</span><br><span class="line">        Objects.requireNonNull(parameter);</span><br><span class="line"></span><br><span class="line">        expungeStaleEntries();</span><br><span class="line"></span><br><span class="line">        Object cacheKey = CacheKey.valueOf(key, refQueue);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// lazily install the 2nd level valuesMap for the particular cacheKey</span></span><br><span class="line">        ConcurrentMap&lt;Object, Supplier&lt;V&gt;&gt; valuesMap = map.get(cacheKey);</span><br><span class="line">        <span class="keyword">if</span> (valuesMap == <span class="keyword">null</span>) &#123;</span><br><span class="line">            ConcurrentMap&lt;Object, Supplier&lt;V&gt;&gt; oldValuesMap</span><br><span class="line">                = map.putIfAbsent(cacheKey,</span><br><span class="line">                                  valuesMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;());</span><br><span class="line">            <span class="keyword">if</span> (oldValuesMap != <span class="keyword">null</span>) &#123;</span><br><span class="line">                valuesMap = oldValuesMap;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// create subKey and retrieve the possible Supplier&lt;V&gt; stored by that</span></span><br><span class="line">        <span class="comment">// subKey from valuesMap</span></span><br><span class="line">        Object subKey = Objects.requireNonNull(subKeyFactory.apply(key, parameter));</span><br><span class="line">        Supplier&lt;V&gt; supplier = valuesMap.get(subKey);</span><br><span class="line">        Factory factory = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (supplier != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// supplier might be a Factory or a CacheValue&lt;V&gt; instance</span></span><br><span class="line">                <span class="comment">// NO3 如果supplier不为空则通过supplier去获取</span></span><br><span class="line">                V value = supplier.get();</span><br><span class="line">                <span class="keyword">if</span> (value != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// else no supplier in cache</span></span><br><span class="line">            <span class="comment">// or a supplier that returned null (could be a cleared CacheValue</span></span><br><span class="line">            <span class="comment">// or a Factory that wasn't successful in installing the CacheValue)</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// lazily construct a Factory</span></span><br><span class="line">            <span class="comment">// NO1 supplier 也有缓存如果没有则创建一个Factory Factory实现了Supplier</span></span><br><span class="line">            <span class="keyword">if</span> (factory == <span class="keyword">null</span>) &#123;</span><br><span class="line">                factory = <span class="keyword">new</span> Factory(key, parameter, subKey, valuesMap);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (supplier == <span class="keyword">null</span>) &#123;</span><br><span class="line">                supplier = valuesMap.putIfAbsent(subKey, factory);</span><br><span class="line">                <span class="keyword">if</span> (supplier == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// successfully installed Factory</span></span><br><span class="line">                    <span class="comment">// NO2 将factory赋值给supplier</span></span><br><span class="line">                    supplier = factory;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// else retry with winning supplier</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (valuesMap.replace(subKey, supplier, factory)) &#123;</span><br><span class="line">                    <span class="comment">// successfully replaced</span></span><br><span class="line">                    <span class="comment">// cleared CacheEntry / unsuccessful Factory</span></span><br><span class="line">                    <span class="comment">// with our Factory</span></span><br><span class="line">                    supplier = factory;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// retry with current supplier</span></span><br><span class="line">                    supplier = valuesMap.get(subKey);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>WeakCache内部类Factory(Supplier)的get方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> V <span class="title">get</span><span class="params">()</span> </span>&#123; <span class="comment">// serialize access</span></span><br><span class="line">        <span class="comment">// re-check</span></span><br><span class="line">        Supplier&lt;V&gt; supplier = valuesMap.get(subKey);</span><br><span class="line">        <span class="keyword">if</span> (supplier != <span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="comment">// something changed while we were waiting:</span></span><br><span class="line">            <span class="comment">// might be that we were replaced by a CacheValue</span></span><br><span class="line">            <span class="comment">// or were removed because of failure -&gt;</span></span><br><span class="line">            <span class="comment">// return null to signal WeakCache.get() to retry</span></span><br><span class="line">            <span class="comment">// the loop</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// else still us (supplier == this)</span></span><br><span class="line">   </span><br><span class="line">        <span class="comment">// create new value</span></span><br><span class="line">        V value = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//NO 关键在这里创建</span></span><br><span class="line">            value = Objects.requireNonNull(valueFactory.apply(key, parameter));</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123; <span class="comment">// remove us on failure</span></span><br><span class="line">                valuesMap.remove(subKey, <span class="keyword">this</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// the only path to reach here is with non-null value</span></span><br><span class="line">        <span class="keyword">assert</span> value != <span class="keyword">null</span>;</span><br><span class="line">   </span><br><span class="line">        <span class="comment">// wrap value with CacheValue (WeakReference)</span></span><br><span class="line">        CacheValue&lt;V&gt; cacheValue = <span class="keyword">new</span> CacheValue&lt;&gt;(value);</span><br><span class="line">   </span><br><span class="line">        <span class="comment">// put into reverseMap</span></span><br><span class="line">        reverseMap.put(cacheValue, Boolean.TRUE);</span><br><span class="line">   </span><br><span class="line">        <span class="comment">// try replacing us with CacheValue (this should always succeed)</span></span><br><span class="line">        <span class="keyword">if</span> (!valuesMap.replace(subKey, <span class="keyword">this</span>, cacheValue)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(<span class="string">"Should not reach here"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">   </span><br><span class="line">        <span class="comment">// successfully replaced us with new CacheValue -&gt; return the value</span></span><br><span class="line">        <span class="comment">// wrapped by it</span></span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关键在valueFactory.apply(key, parameter)方法， valueFactory是一个BiFunction&lt;K, P, V&gt;是java8函数式接口，表示传入2个参数(K,P类型)返回一个V类型的结果。如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compute</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b, BiFunction&lt;Integer, Integer, Integer&gt; biFunction)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">return</span> biFunction.apply(a, b);</span><br><span class="line">&#125;</span><br><span class="line">test.compute(<span class="number">2</span>, <span class="number">3</span>, (v1, v2) -&gt; v1 + v2) <span class="comment">//5</span></span><br><span class="line">test.compute(<span class="number">2</span>, <span class="number">3</span>, (v1, v2) -&gt; v1 - v2) <span class="comment">//-1</span></span><br><span class="line">test.compute(<span class="number">2</span>, <span class="number">3</span>, (v1, v2) -&gt; v1 * v2) <span class="comment">//6</span></span><br></pre></td></tr></table></figure>
+<p>那么我们看下传入的valueFactory是什么呢？此变量是的实例变量，在构造函数内有初始化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WeakCache</span>&lt;<span class="title">K</span>, <span class="title">P</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    ... 省略...</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> BiFunction&lt;K, P, ?&gt; subKeyFactory;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> BiFunction&lt;K, P, V&gt; valueFactory;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Construct an instance of &#123;<span class="doctag">@code</span> WeakCache&#125;</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> subKeyFactory a function mapping a pair of</span></span><br><span class="line"><span class="comment">     *                      &#123;<span class="doctag">@code</span> (key, parameter) -&gt; sub-key&#125;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> valueFactory  a function mapping a pair of</span></span><br><span class="line"><span class="comment">     *                      &#123;<span class="doctag">@code</span> (key, parameter) -&gt; value&#125;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> subKeyFactory&#125; or</span></span><br><span class="line"><span class="comment">     *                              &#123;<span class="doctag">@code</span> valueFactory&#125; is null.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">WeakCache</span><span class="params">(BiFunction&lt;K, P, ?&gt; subKeyFactory,</span></span></span><br><span class="line"><span class="function"><span class="params">                     BiFunction&lt;K, P, V&gt; valueFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.subKeyFactory = Objects.requireNonNull(subKeyFactory);</span><br><span class="line">        <span class="keyword">this</span>.valueFactory = Objects.requireNonNull(valueFactory);</span><br><span class="line">    &#125;</span><br><span class="line">  ... 省略...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续跟创建WeakCache是哪里？传的是什么？看到在Proxy的getProxyClass0时使用的proxyClassCache，那么它是什么呢？可见是ProxyClassFactory，它是Proxy的内部类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2222568056686623797L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** parameter types of a proxy class constructor */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Class&lt;?&gt;[] constructorParams =</span><br><span class="line">        &#123; InvocationHandler.class &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * a cache of proxy classes</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> WeakCache&lt;ClassLoader, Class&lt;?&gt;[], Class&lt;?&gt;&gt;</span><br><span class="line">        proxyClassCache = <span class="keyword">new</span> WeakCache&lt;&gt;(<span class="keyword">new</span> KeyFactory(), <span class="keyword">new</span> ProxyClassFactory());</span><br><span class="line">   ... 省略...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Proxy的内部类ProxyClassFactory的applay方法</p>
+<p>关键在ProxyGenerator.generateProxyClass生成class和defineClass0，defineClass0是native方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> saveGeneratedFiles = (Boolean)AccessController.doPrivileged(<span class="keyword">new</span> GetBooleanAction(<span class="string">"sun.misc.ProxyGenerator.saveGeneratedFiles"</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ProxyClassFactory</span></span></span><br><span class="line">        implements BiFunction&lt;ClassLoader, Class&lt;?&gt;[], Class&lt;?&gt;&gt;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// prefix for all proxy class names</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String proxyClassNamePrefix = <span class="string">"$Proxy"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// next number to use for generation of unique proxy class names</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicLong nextUniqueNumber = <span class="keyword">new</span> AtomicLong();</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> Class&lt;?&gt; apply(ClassLoader loader, Class&lt;?&gt;[] interfaces) &#123;</span><br><span class="line"></span><br><span class="line">            Map&lt;Class&lt;?&gt;, Boolean&gt; interfaceSet = <span class="keyword">new</span> IdentityHashMap&lt;&gt;(interfaces.length);</span><br><span class="line">            <span class="keyword">for</span> (Class&lt;?&gt; intf : interfaces) &#123;</span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                 * Verify that the class loader resolves the name of this</span></span><br><span class="line"><span class="comment">                 * interface to the same Class object.</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                Class&lt;?&gt; interfaceClass = <span class="keyword">null</span>;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    interfaceClass = Class.forName(intf.getName(), <span class="keyword">false</span>, loader);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (interfaceClass != intf) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">                        intf + <span class="string">" is not visible from class loader"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                 * Verify that the Class object actually represents an</span></span><br><span class="line"><span class="comment">                 * interface.</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">if</span> (!interfaceClass.isInterface()) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">                        interfaceClass.getName() + <span class="string">" is not an interface"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                 * Verify that this interface is not a duplicate.</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">if</span> (interfaceSet.put(interfaceClass, Boolean.TRUE) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">                        <span class="string">"repeated interface: "</span> + interfaceClass.getName());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            String proxyPkg = <span class="keyword">null</span>;     <span class="comment">// package to define proxy class in</span></span><br><span class="line">            <span class="keyword">int</span> accessFlags = Modifier.PUBLIC | Modifier.FINAL;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">             * Record the package of a non-public proxy interface so that the</span></span><br><span class="line"><span class="comment">             * proxy class will be defined in the same package.  Verify that</span></span><br><span class="line"><span class="comment">             * all non-public proxy interfaces are in the same package.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">for</span> (Class&lt;?&gt; intf : interfaces) &#123;</span><br><span class="line">                <span class="keyword">int</span> flags = intf.getModifiers();</span><br><span class="line">                <span class="keyword">if</span> (!Modifier.isPublic(flags)) &#123;</span><br><span class="line">                    accessFlags = Modifier.FINAL;</span><br><span class="line">                    String name = intf.getName();</span><br><span class="line">                    <span class="keyword">int</span> n = name.lastIndexOf(<span class="string">'.'</span>);</span><br><span class="line">                    String pkg = ((n == -<span class="number">1</span>) ? <span class="string">""</span> : name.substring(<span class="number">0</span>, n + <span class="number">1</span>));</span><br><span class="line">                    <span class="keyword">if</span> (proxyPkg == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        proxyPkg = pkg;</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!pkg.equals(proxyPkg)) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">                            <span class="string">"non-public interfaces from different packages"</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (proxyPkg == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// if no non-public proxy interfaces, use com.sun.proxy package</span></span><br><span class="line">                proxyPkg = ReflectUtil.PROXY_PACKAGE + <span class="string">"."</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">             * Choose a name for the proxy class to generate.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">long</span> num = nextUniqueNumber.getAndIncrement();</span><br><span class="line">            String proxyName = proxyPkg + proxyClassNamePrefix + num;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">             * Generate the specified proxy class.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">byte</span>[] proxyClassFile = ProxyGenerator.generateProxyClass(</span><br><span class="line">                proxyName, interfaces, accessFlags);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> defineClass0(loader, proxyName,</span><br><span class="line">                                    proxyClassFile, <span class="number">0</span>, proxyClassFile.length);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ClassFormatError e) &#123;</span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                 * A ClassFormatError here means that (barring bugs in the</span></span><br><span class="line"><span class="comment">                 * proxy class generation code) there was some other</span></span><br><span class="line"><span class="comment">                 * invalid aspect of the arguments supplied to the proxy</span></span><br><span class="line"><span class="comment">                 * class creation (such as virtual machine limitations</span></span><br><span class="line"><span class="comment">                 * exceeded).</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(e.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ProxyGenerator.generateProxyClass</p>
+<p>可见saveGeneratedFiles可以控制是否将文件写入本地</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] generateProxyClass(<span class="keyword">final</span> String var0, Class&lt;?&gt;[] var1, <span class="keyword">int</span> var2) &#123;</span><br><span class="line">        ProxyGenerator var3 = <span class="keyword">new</span> ProxyGenerator(var0, var1, var2);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">byte</span>[] var4 = var3.generateClassFile();</span><br><span class="line">        <span class="keyword">if</span> (saveGeneratedFiles) &#123;</span><br><span class="line">            AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedAction&lt;Void&gt;() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> Void <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">int</span> var1 = var0.lastIndexOf(<span class="number">46</span>);</span><br><span class="line">                        Path var2;</span><br><span class="line">                        <span class="keyword">if</span> (var1 &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                            Path var3 = Paths.get(var0.substring(<span class="number">0</span>, var1).replace(<span class="string">'.'</span>, File.separatorChar));</span><br><span class="line">                            Files.createDirectories(var3);</span><br><span class="line">                            var2 = var3.resolve(var0.substring(var1 + <span class="number">1</span>, var0.length()) + <span class="string">".class"</span>);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            var2 = Paths.get(var0 + <span class="string">".class"</span>);</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        Files.write(var2, var4, <span class="keyword">new</span> OpenOption[<span class="number">0</span>]);</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (IOException var4x) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">"I/O exception saving generated file: "</span> + var4x);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> var4;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">byte</span>[] generateClassFile() &#123;</span><br><span class="line">        <span class="keyword">this</span>.addProxyMethod(hashCodeMethod, Object.class);</span><br><span class="line">        <span class="keyword">this</span>.addProxyMethod(equalsMethod, Object.class);</span><br><span class="line">        <span class="keyword">this</span>.addProxyMethod(toStringMethod, Object.class);</span><br><span class="line">        Class[] var1 = <span class="keyword">this</span>.interfaces;</span><br><span class="line">        <span class="keyword">int</span> var2 = var1.length;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> var3;</span><br><span class="line">        Class var4;</span><br><span class="line">        <span class="keyword">for</span>(var3 = <span class="number">0</span>; var3 &lt; var2; ++var3) &#123;</span><br><span class="line">            var4 = var1[var3];</span><br><span class="line">            Method[] var5 = var4.getMethods();</span><br><span class="line">            <span class="keyword">int</span> var6 = var5.length;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> var7 = <span class="number">0</span>; var7 &lt; var6; ++var7) &#123;</span><br><span class="line">                Method var8 = var5[var7];</span><br><span class="line">                <span class="keyword">this</span>.addProxyMethod(var8, var4);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Iterator var11 = <span class="keyword">this</span>.proxyMethods.values().iterator();</span><br><span class="line"></span><br><span class="line">        List var12;</span><br><span class="line">        <span class="keyword">while</span>(var11.hasNext()) &#123;</span><br><span class="line">            var12 = (List)var11.next();</span><br><span class="line">            checkReturnTypes(var12);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Iterator var15;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.methods.add(<span class="keyword">this</span>.generateConstructor());</span><br><span class="line">            var11 = <span class="keyword">this</span>.proxyMethods.values().iterator();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>(var11.hasNext()) &#123;</span><br><span class="line">                var12 = (List)var11.next();</span><br><span class="line">                var15 = var12.iterator();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span>(var15.hasNext()) &#123;</span><br><span class="line">                    ProxyGenerator.ProxyMethod var16 = (ProxyGenerator.ProxyMethod)var15.next();</span><br><span class="line">                    <span class="keyword">this</span>.fields.add(<span class="keyword">new</span> ProxyGenerator.FieldInfo(var16.methodFieldName, <span class="string">"Ljava/lang/reflect/Method;"</span>, <span class="number">10</span>));</span><br><span class="line">                    <span class="keyword">this</span>.methods.add(var16.generateMethod());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.methods.add(<span class="keyword">this</span>.generateStaticInitializer());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException var10) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">"unexpected I/O Exception"</span>, var10);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.methods.size() &gt; <span class="number">65535</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"method limit exceeded"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.fields.size() &gt; <span class="number">65535</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"field limit exceeded"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.cp.getClass(dotToSlash(<span class="keyword">this</span>.className));</span><br><span class="line">            <span class="keyword">this</span>.cp.getClass(<span class="string">"java/lang/reflect/Proxy"</span>);</span><br><span class="line">            var1 = <span class="keyword">this</span>.interfaces;</span><br><span class="line">            var2 = var1.length;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(var3 = <span class="number">0</span>; var3 &lt; var2; ++var3) &#123;</span><br><span class="line">                var4 = var1[var3];</span><br><span class="line">                <span class="keyword">this</span>.cp.getClass(dotToSlash(var4.getName()));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.cp.setReadOnly();</span><br><span class="line">            ByteArrayOutputStream var13 = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">            DataOutputStream var14 = <span class="keyword">new</span> DataOutputStream(var13);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                var14.writeInt(-<span class="number">889275714</span>);</span><br><span class="line">                var14.writeShort(<span class="number">0</span>);</span><br><span class="line">                var14.writeShort(<span class="number">49</span>);</span><br><span class="line">                <span class="keyword">this</span>.cp.write(var14);</span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.accessFlags);</span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.cp.getClass(dotToSlash(<span class="keyword">this</span>.className)));</span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.cp.getClass(<span class="string">"java/lang/reflect/Proxy"</span>));</span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.interfaces.length);</span><br><span class="line">                Class[] var17 = <span class="keyword">this</span>.interfaces;</span><br><span class="line">                <span class="keyword">int</span> var18 = var17.length;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> var19 = <span class="number">0</span>; var19 &lt; var18; ++var19) &#123;</span><br><span class="line">                    Class var22 = var17[var19];</span><br><span class="line">                    var14.writeShort(<span class="keyword">this</span>.cp.getClass(dotToSlash(var22.getName())));</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.fields.size());</span><br><span class="line">                var15 = <span class="keyword">this</span>.fields.iterator();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span>(var15.hasNext()) &#123;</span><br><span class="line">                    ProxyGenerator.FieldInfo var20 = (ProxyGenerator.FieldInfo)var15.next();</span><br><span class="line">                    var20.write(var14);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                var14.writeShort(<span class="keyword">this</span>.methods.size());</span><br><span class="line">                var15 = <span class="keyword">this</span>.methods.iterator();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span>(var15.hasNext()) &#123;</span><br><span class="line">                    ProxyGenerator.MethodInfo var21 = (ProxyGenerator.MethodInfo)var15.next();</span><br><span class="line">                    var21.write(var14);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                var14.writeShort(<span class="number">0</span>);</span><br><span class="line">                <span class="keyword">return</span> var13.toByteArray();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException var9) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">"unexpected I/O Exception"</span>, var9);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这样在获取到class后回到Proxy.newProxyInstance方法内通过Constructor 的newInstance就获取到了新生成的类的对象</p>
+</li>
+<li><p>我们看看新生成的类在com.sun.proxy下面的<strong>$Proxy0</strong>的代码</p>
+<p>果然都是调用了<strong>InvocationHandler</strong>的invoke方法，可以看到<strong>InvocationHandler就是我们需要的目标代理的业务逻辑的封装，里面注入了一个真实对象</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Source code recreated from a .class file by IntelliJ IDEA</span></span><br><span class="line"><span class="comment">// (powered by Fernflower decompiler)</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.sun.proxy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.UndeclaredThrowableException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.mytest.aop.jdk.test.BusinessInterface;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> $<span class="title">Proxy0</span> <span class="keyword">extends</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">BusinessInterface</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Method m1;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Method m3;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Method m4;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Method m2;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Method m0;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> $Proxy0(InvocationHandler var1) <span class="keyword">throws</span>  &#123;</span><br><span class="line">        <span class="keyword">super</span>(var1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object var1)</span> <span class="keyword">throws</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (Boolean)<span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m1, <span class="keyword">new</span> Object[]&#123;var1&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> var3;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var4) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var4);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m3, (Object[])<span class="keyword">null</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span><br><span class="line">            <span class="keyword">throw</span> var2;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">doSth</span><span class="params">(String var1)</span> <span class="keyword">throws</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)<span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m4, <span class="keyword">new</span> Object[]&#123;var1&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> var3;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var4) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var4);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">toString</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (String)<span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m2, (Object[])<span class="keyword">null</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span><br><span class="line">            <span class="keyword">throw</span> var2;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (Integer)<span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m0, (Object[])<span class="keyword">null</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span><br><span class="line">            <span class="keyword">throw</span> var2;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            m1 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"equals"</span>, Class.forName(<span class="string">"java.lang.Object"</span>));</span><br><span class="line">            m3 = Class.forName(<span class="string">"org.springframework.mytest.aop.jdk.test.BusinessInterface"</span>).getMethod(<span class="string">"hello"</span>);</span><br><span class="line">            m4 = Class.forName(<span class="string">"org.springframework.mytest.aop.jdk.test.BusinessInterface"</span>).getMethod(<span class="string">"doSth"</span>, Class.forName(<span class="string">"java.lang.String"</span>));</span><br><span class="line">            m2 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"toString"</span>);</span><br><span class="line">            m0 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"hashCode"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException var2) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchMethodError(var2.getMessage());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException var3) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoClassDefFoundError(var3.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>至此我们了解了JDK动态代理的原理，实现动态代理还可以通过<strong>CGLIB</strong>动态代理来实现，<strong>CGLIB</strong>是通过ASM字节码工具生成目标类的子类并重新了子类的方法，这就是二者的主要区别。后续我们再分析下CGLIB的动态代理。</p>
+</li>
+<li><p>不知道读者是否发现一个问题，在抽象主题中有2个方法，在动态代理的invoke方法中都加强了，那么是否需要加强某些方法要怎么控制？在invoke中增加判断？根据方法名等等？后续研究下spring AOP的实现逻辑。</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>        
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Donate comment here</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Anchor 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Anchor 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"># 源码</a>
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/动态代理/" rel="tag"># 动态代理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/16/Intellij Idea中生成类图和时序图/" rel="next" title="Intellij Idea中生成类图和时序图">
+                <i class="fa fa-chevron-left"></i> Intellij Idea中生成类图和时序图
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Anchor</p>
+              <p class="site-description motion-element" itemprop="description">Anchor</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zhaojingyang" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么需要代理"><span class="nav-number">1.</span> <span class="nav-text">为什么需要代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代理角色与分类"><span class="nav-number">2.</span> <span class="nav-text">代理角色与分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#静态代理例子"><span class="nav-number">3.</span> <span class="nav-text">静态代理例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态代理例子"><span class="nav-number">4.</span> <span class="nav-text">动态代理例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态代理实现原理"><span class="nav-number">5.</span> <span class="nav-text">动态代理实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UML"><span class="nav-number">5.0.1.</span> <span class="nav-text">UML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理分析"><span class="nav-number">5.0.2.</span> <span class="nav-text">原理分析</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Anchor</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+<div class="BbeiAn-info"">
+  渝ICP备 -
+  <a href="http://www.miitbeian.gov.cn/">14029750号-5</a>
+  
+</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WsyE6xtHWoiiepyKmhgb8xDr-9Nh9j0Va',
+        appKey: 'v0cyO9hb0X1a6Faq7evT7CJt',
+        placeholder: '柳岩的球迷们',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+#  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script src="https://cdn1.lncld.net/static/js/3.10.0/av-min.js"></script>
+  <script>AV.initialize("WsyE6xtHWoiiepyKmhgb8xDr-9Nh9j0Va", "v0cyO9hb0X1a6Faq7evT7CJt");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
